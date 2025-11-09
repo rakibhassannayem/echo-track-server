@@ -38,6 +38,21 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/active-challenges", async (req, res) => {
+      const currentDate = new Date();
+      const query = {
+        startDate: { $lte: currentDate },
+        endDate: { $gte: currentDate },
+      };
+
+      const result = await challengeCollection
+        .find(query)
+        .sort({ endDate: 1 })
+        .toArray();
+
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
