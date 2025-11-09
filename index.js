@@ -24,7 +24,8 @@ async function run() {
 
     const db = client.db("echo-track_DB");
     const challengeCollection = db.collection("challenges");
-    const tipsCollection = db.collection("tips");
+    const tipCollection = db.collection("tips");
+    const eventCollection = db.collection("events");
 
     app.get("/challenges", async (req, res) => {
       const result = await challengeCollection.find().toArray();
@@ -39,10 +40,38 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/active-challenges", async (req, res) => {
+      const currentDate = new Date();
+      const query = {
+        startDate: { $lte: currentDate },
+        endDate: { $gte: currentDate },
+      };
+
+      const result = await challengeCollection
+        .find(query)
+        .sort({ endDate: 1 })
+        .toArray();
+
+      res.send(result);
+    });
+
     app.get("/tips", async (req, res) => {
-      const result = await tipsCollection
+      const result = await tipCollection
         .find()
         .sort({ createdAt: -1 })
+        .limit(5)
+        .toArray();
+
+      res.send(result);
+    });
+
+    app.get("/upcoming-events", async (req, res) => {
+      const currentDate = new Date();
+      const query = {
+        date: { $gte: currentDate },
+      };
+      const result = await eventCollection
+        .find(query)
         .limit(5)
         .toArray();
 
