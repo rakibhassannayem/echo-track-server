@@ -32,7 +32,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/challenges/:id", async (req, res) => {
+    app.get("/challenge/:id", async (req, res) => {
       const { id } = req.params;
       const objectId = new ObjectId(id);
 
@@ -55,6 +55,15 @@ async function run() {
       res.send(result);
     });
 
+    app.post("/challenges", async (req, res) => {
+      const data = req.body;
+      console.log(data);
+      const result = challengeCollection.insertOne(data);
+      res.send({
+        success: true,
+      });
+    });
+
     app.get("/tips", async (req, res) => {
       const result = await tipCollection
         .find()
@@ -70,10 +79,7 @@ async function run() {
       const query = {
         date: { $gte: currentDate },
       };
-      const result = await eventCollection
-        .find(query)
-        .limit(5)
-        .toArray();
+      const result = await eventCollection.find(query).limit(4).toArray();
 
       res.send(result);
     });
