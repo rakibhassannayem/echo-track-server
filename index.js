@@ -87,9 +87,28 @@ async function run() {
 
     app.get("/my-activities", async (req, res) => {
       const email = req.query.email;
+
       const result = await userChallengeCollection
-        .find({ userEmail: email })
+        .aggregate([
+          {
+            $match: {
+              userEmail: email,
+            },
+          },
+          {
+            $lookup: {
+              from: "challenges",
+              localField: "challengeId",
+              foreignField: "_id",
+              as: "challenge",
+            },
+          },
+          {
+            $unwind: "$challenge",
+          },
+        ])
         .toArray();
+
       res.send(result);
     });
 
