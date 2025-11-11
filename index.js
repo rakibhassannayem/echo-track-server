@@ -26,6 +26,15 @@ async function run() {
     const challengeCollection = db.collection("challenges");
     const tipCollection = db.collection("tips");
     const eventCollection = db.collection("events");
+    const userChallengeCollection = db.collection("userChallenges");
+
+    app.post("/userChallenges", async (req, res) => {
+      const userChallenge = req.body;
+      userChallenge.challengeId = new ObjectId(userChallenge.challengeId);
+
+      const result = await userChallengeCollection.insertOne(userChallenge);
+      res.send({ success: true, result });
+    });
 
     app.get("/challenges", async (req, res) => {
       const result = await challengeCollection.find().toArray();
@@ -57,10 +66,17 @@ async function run() {
 
     app.post("/challenges", async (req, res) => {
       const data = req.body;
-      console.log(data);
-      const result = challengeCollection.insertOne(data);
+      data.startDate = new Date(data.startDate);
+      data.endDate = new Date(data.endDate);
+      data.duration = Math.max(
+        0,
+        Math.ceil((data.endDate - data.startDate) / (1000 * 60 * 60 * 24))
+      );
+
+      const result = await challengeCollection.insertOne(data);
       res.send({
         success: true,
+        result,
       });
     });
 
