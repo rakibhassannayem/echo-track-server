@@ -36,6 +36,11 @@ async function run() {
       res.send({ success: true, result });
     });
 
+    app.get("/userChallenges", async (req, res) => {
+      const result = await userChallengeCollection.find().toArray();
+      res.send(result);
+    });
+
     app.get("/challenges", async (req, res) => {
       const result = await challengeCollection.find().toArray();
       res.send(result);
@@ -78,6 +83,14 @@ async function run() {
         success: true,
         result,
       });
+    });
+
+    app.get("/my-activities", async (req, res) => {
+      const email = req.query.email;
+      const result = await userChallengeCollection
+        .find({ userEmail: email })
+        .toArray();
+      res.send(result);
     });
 
     app.get("/tips", async (req, res) => {
