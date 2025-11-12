@@ -54,6 +54,18 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/challenges/:id", async (req, res) => {
+      const { id } = req.params;
+      const objectId = new ObjectId(id);
+      const query = { _id: objectId };
+
+      const update = {
+        $inc: { participants: 1 },
+      };
+      const result = await challengeCollection.updateOne(query, update);
+      res.send(result);
+    });
+
     app.get("/active-challenges", async (req, res) => {
       const currentDate = new Date();
       const query = {
