@@ -41,6 +41,26 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/userChallenges/:id", async (req, res) => {
+      const { id } = req.params;
+      const objectId = new ObjectId(id);
+
+      const result = await userChallengeCollection.findOne({ _id: objectId });
+      res.send(result);
+    });
+
+    app.patch("/userChallenges/:id", async (req, res) => {
+      const { id } = req.params;
+      const objectId = new ObjectId(id);
+      const query = { challengeId: objectId };
+
+      const update = {
+        $inc: { progress: 1 },
+      };
+      const result = await userChallengeCollection.updateOne(query, update);
+      res.send(result);
+    });
+
     app.get("/challenges", async (req, res) => {
       const result = await challengeCollection.find().toArray();
       res.send(result);
