@@ -117,6 +117,14 @@ async function run() {
       });
     });
 
+    app.get("/my-challenges", async (req, res) => {
+      const email = req.query.email;
+      const result = await challengeCollection
+        .find({ createdBy: email })
+        .toArray();
+      res.send(result);
+    });
+
     app.get("/my-activities", async (req, res) => {
       const email = req.query.email;
 
