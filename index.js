@@ -62,8 +62,15 @@ async function run() {
     });
 
     app.get("/challenges", async (req, res) => {
-      const result = await challengeCollection.find().toArray();
-      res.send(result);
+      try {
+        const category = req.query.category;
+        const query = category ? { category } : {};
+        const result = await challengeCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching challenges:", error);
+        res.status(500).send({ message: "Internal Server Error" });
+      }
     });
 
     app.get("/challenge/:id", async (req, res) => {
