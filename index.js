@@ -74,6 +74,22 @@ async function run() {
       res.send(result);
     });
 
+    app.put("/challenges/:id", async (req, res) => {
+      const { id } = req.params;
+      const objectId = new ObjectId(id);
+      const data = req.body;
+      const query = { _id: objectId };
+
+      const update = {
+        $set: data,
+      };
+      const result = await challengeCollection.updateOne(query, update);
+      res.send({
+        success: true,
+        result,
+      });
+    });
+
     app.patch("/challenges/:id", async (req, res) => {
       const { id } = req.params;
       const objectId = new ObjectId(id);
@@ -105,6 +121,8 @@ async function run() {
       const data = req.body;
       data.startDate = new Date(data.startDate);
       data.endDate = new Date(data.endDate);
+      data.createdAt = new Date(data.createdAt);
+      data.updatedAt = new Date(data.updateAt);
       data.duration = Math.max(
         0,
         Math.ceil((data.endDate - data.startDate) / (1000 * 60 * 60 * 24))
