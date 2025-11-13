@@ -102,6 +102,18 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/challenges/:id", async (req, res) => {
+      const { id } = req.params;
+      const objectId = new ObjectId(id);
+      const query = { _id: objectId };
+
+      const result = await challengeCollection.deleteOne(query);
+      res.send({
+        success: true,
+        result,
+      });
+    });
+
     app.get("/active-challenges", async (req, res) => {
       const currentDate = new Date();
       const query = {
