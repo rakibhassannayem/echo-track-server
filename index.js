@@ -20,7 +20,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("echo-track_DB");
     const challengeCollection = db.collection("challenges");
@@ -28,12 +28,45 @@ async function run() {
     const eventCollection = db.collection("events");
     const userChallengeCollection = db.collection("userChallenges");
 
-    app.post("/userChallenges", async (req, res) => {
-      const userChallenge = req.body;
-      userChallenge.challengeId = new ObjectId(userChallenge.challengeId);
+    // app.post("/userChallenges", async (req, res) => {
+    //   const userChallenge = req.body;
+    //   userChallenge.challengeId = new ObjectId(userChallenge.challengeId);
 
-      const result = await userChallengeCollection.insertOne(userChallenge);
-      res.send({ success: true, result });
+    //   const result = await userChallengeCollection.insertOne(userChallenge);
+    //   res.send({ success: true, result });
+    // });
+
+    app.post("/userChallenges", async (req, res) => {
+      try {
+        const userChallenge = req.body;
+        userChallenge.challengeId = new ObjectId(userChallenge.challengeId);
+
+        const existing = await userChallengeCollection.findOne({
+          userEmail: userChallenge.userEmail,
+          challengeId: userChallenge.challengeId,
+        });
+
+        if (existing) {
+          return res.status(400).send({
+            success: false,
+            message: "You have already joined this challenge!",
+          });
+        }
+
+        const result = await userChallengeCollection.insertOne(userChallenge);
+
+        res.send({
+          success: true,
+          result,
+          message: "Joined challenge successfully!",
+        });
+      } catch (error) {
+        console.error("Error joining challenge:", error);
+        res.status(500).send({
+          success: false,
+          message: "Internal server error while joining challenge.",
+        });
+      }
     });
 
     app.get("/userChallenges", async (req, res) => {
@@ -209,7 +242,30 @@ async function run() {
       res.send(result);
     });
 
-    await client.db("admin").command({ ping: 1 });
+    app.get("/members", async (req, res) => {
+      try {
+        const result = await userChallengeCollection.aggregate([
+          {
+            $group: {
+              _id: "$userEmail"
+            }
+          },
+          {
+            $count: "members"
+          }
+        ]).toArray();
+
+        res.send({
+          members: result[0]?.members || 0
+        });
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
+    });
+
+
+
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
