@@ -52,7 +52,6 @@ async function run() {
             message: "You have already joined this challenge!",
           });
         }
-
         const result = await userChallengeCollection.insertOne(userChallenge);
 
         res.send({
@@ -84,11 +83,12 @@ async function run() {
 
     app.patch("/userChallenges/:id", async (req, res) => {
       const { id } = req.params;
+      const { progress } = req.body;
       const objectId = new ObjectId(id);
-      const query = { challengeId: objectId };
+      const query = { _id: objectId };
 
       const update = {
-        $inc: { progress: 1 },
+        $inc: { progress: progress || 1 },
       };
       const result = await userChallengeCollection.updateOne(query, update);
       res.send(result);
@@ -262,8 +262,6 @@ async function run() {
         res.status(500).send({ error: error.message });
       }
     });
-
-
 
     // await client.db("admin").command({ ping: 1 });
     console.log(
